@@ -9,5 +9,7 @@ After downloading the album the script orders the songs according to the track l
 ## Usage
 You start by choosing the album, in this case it'll be Michael Jackson's Thriller.
 
-![Michael Jackson's Thriller playlist] (https://imgur.com/a/1LirgQS)
-If you want to make sure that you'll be downloading the official album, make sure you choose the playlist whose thumbnail has colored bars at the sides of the album cover.
+![Michael Jackson's Thriller playlist]()
+*If you want to make sure that you'll be downloading the official album, make sure you choose the playlist whose thumbnail has colored bars at the sides of the album cover.*
+
+
