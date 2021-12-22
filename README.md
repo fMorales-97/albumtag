@@ -1,5 +1,5 @@
 # Albumtag
-A POSIX complaint shell script to write metadata to your albums.
+A POSIX compliant shell script to write metadata to your albums.
 
 ## ¿How does it work?
 First you have to obtain the album, to do this you have to use `yt-dlp` or `youtube-dl` and download a playlist from youtube. This reason of this is because when an artist release an album, its record label distributes it in different platforms like Spotify, Itunes, Apple Music, etc. One of these platforms is Youtube and it uploads the album in the form of an auto-generated playlist, in other words, **you can find pretty much every album officially in youtube through playlists.**
@@ -79,7 +79,7 @@ A: Because it has much better sound quality with similar (if not better) compres
 
 Q: ¿Does it work in any distro?
 
-A: Since it's a POSIX complaint shell script and as long as you have the dependencies mentioned above, you shouldn't have any problems, although I haven't tested it in any distro other than Arch Linux. Keep in mind that the dependencies names may change depending on the distro so check the availability of those before running this script.
+A: Since it's a POSIX compliant shell script and as long as you have the dependencies mentioned above, you shouldn't have any problems, although I haven't tested it in any distro other than Arch Linux. Keep in mind that the dependencies names may change depending on the distro so check the availability of those before running this script.
 
 Q: ¿How can I get the album covers?
 
