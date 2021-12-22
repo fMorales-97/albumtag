@@ -1,0 +1,159 @@
+#!/bin/sh
+
+# Some variables definition
+GREEN="\033[0;32m"
+RED="\033[0;31m"
+BOLD="\033[1m"
+NC="\033[0m"
+
+# Start
+[ ! -f "$1" ] && printf "${RED}${BOLD}You have to select the tracks file${NC}\n" && exit
+
+TRACK=0
+TOTAL="$(wc -l < $1)"
+
+# List the songs by download order and replace the spaces for dregrees symbols
+# in order to have the name of the songs be recognised as a single string of 
+# text instead of separate lines when being iterated inside the loop.
+SONGS=$(ls *.opus --time=creation -r | sed "s/ /°/g")
+# Comment the line from above and un-comment the line bellow if using youtube-dl
+# SONGS=$(ls *.m4a --time=creation -r | sed "s/ /°/g")
+
+# The loop
+for SONG in $SONGS; do
+  TRACK="$(printf "%02d" "$(expr $TRACK + 1)")"
+  SONGNAME="$(printf "$SONG" | sed "s/°/ /g;s/ \[.*\.//g;s/opus$/°$TRACK/g" | awk -F ° '{print $2,$1}' | sed "s/\s/ - /")"
+  printf "Renaming '$(printf $SONG | sed "s/°/ /g;s/ \[.*//g")'\n"
+  # Revert the degrees symbols to spaces so the script can rename the original
+  # file
+  mv "$(printf $SONG | sed 's/°/ /g')" "$SONGNAME.opus"
+
+  # Comment lines from above and un-comment lines from below if using youtube-dl
+  # SONGNAME="$(printf "$SONG" | sed "s/°/ /g;s/-.*\.//g;s/m4a$/°$TRACK/g" | awk -F ° '{print $2,$1}' | sed "s/\s/ - /")"
+  # printf "Convirtiendo '$(printf $SONG | sed "s/°/ /g;s/-.*//g")'\n"
+
+  # Revert the degrees symbols to spaces so ffmpeg can recognise the original 
+  # name and change the song's format
+  # ffmpeg -nostdin -loglevel 16 -i "$(printf $SONG | sed "s/°/ /g")" "$SONGNAME.opus"
+done
+
+# General metadata
+EXIT=false
+echo
+printf "Name of the album:\n"; read -r ALBUM
+printf "Name of the artist:\n"; read -r ARTIST
+printf "Year of publishing:\n"; read -r DATE
+while [ $EXIT = false ]; do
+  printf "¿How many genres has the album? [1/2/3]\n"; read ANSWER
+  case $ANSWER in
+    1)
+      printf "Album genre:\n"; read -r GENRE
+      EXIT=true
+      ;;
+    2)
+      printf "First genre of the album:\n"; read -r GENRE
+      printf "Second genre of the album:\n"; read -r GENRE2
+      EXIT=true
+      ;;
+    3)
+      printf "First genre of the album:\n"; read -r GENRE
+      printf "Second genre of the album:\n"; read -r GENRE2
+      printf "Third genre of the album:\n"; read -r GENRE3
+      EXIT=true
+      ;;
+    *)
+      echo
+      printf "${BOLD}${RED}That's not a valid option${NC}\n"
+      ;;
+  esac
+done
+EXIT=false
+while [ $EXIT = false ]; do
+  printf "¿Does the album has more than one disc? [y/n]\n"; read ANSWER
+  case $ANSWER in
+    y)
+      printf "Disc number:\n"; read -r DISCNUMBER
+      EXIT=true
+      ;;
+    n)
+      EXIT=true
+      ;;
+    *)
+      echo
+      printf "${RED}${BOLD}That's not a valid option${NC}\n"
+      ;;
+  esac
+done
+echo
+TRACK=0
+ 
+# Apply metadata
+if [ -n "$GENRE2" ]; then
+  for SONG in *.opus; do
+    NAME="$(printf "$SONG" | awk '{print substr($0, index($0, $3))}' | sed 's/\.opus$//g')"
+    TRACK="$(printf "$(expr $TRACK + 1)")"
+    printf "Writing metadata of '$SONG'\n"
+    opustags "$SONG" --in-place -D
+
+    # If the album has more than one disc
+    if [ -n "$DISCNUMBER" ]; then
+      opustags "$SONG" --in-place -a "TITLE=$NAME" -a "ALBUM=$ALBUM" -a "ARTIST=$ARTIST" -a "DATE=$DATE" -a "GENRE=$GENRE" -a "GENRE=$GENRE2" -a "TRACKNUMBER=$TRACK" -a "TOTALTRACKS=$TOTAL" -a "DISCNUMBER=$DISCNUMBER"
+    else
+      opustags "$SONG" --in-place -a "TITLE=$NAME" -a "ALBUM=$ALBUM" -a "ARTIST=$ARTIST" -a "DATE=$DATE" -a "GENRE=$GENRE" -a "GENRE=$GENRE2" -a "TRACKNUMBER=$TRACK" -a "TOTALTRACKS=$TOTAL"
+    fi
+  done
+elif [ -n "$GENRE3" ]; then
+  for SONG in *.opus; do
+    NAME="$(printf "$SONG" | awk '{print substr($0, index($0, $3))}' | sed 's/\.opus$//g')"
+    TRACK="$(printf "$(expr $TRACK + 1)")"
+    printf "Writing metadata of '$SONG'\n"
+    opustags "$SONG" --in-place -D
+
+    # If the album has more than one disc
+    if [ -n "$DISCNUMBER" ]; then
+      opustags "$SONG" --in-place -a "TITLE=$NAME" -a "ALBUM=$ALBUM" -a "ARTIST=$ARTIST" -a "DATE=$DATE" -a "GENRE=$GENRE" -a "GENRE=$GENRE2" -a "GENRE=$GENRE3" -a "TRACKNUMBER=$TRACK" -a "TOTALTRACKS=$TOTAL" -a "DISCNUMBER=$DISCNUMBER"
+    else
+      opustags "$SONG" --in-place -a "TITLE=$NAME" -a "ALBUM=$ALBUM" -a "ARTIST=$ARTIST" -a "DATE=$DATE" -a "GENRE=$GENRE" -a "GENRE=$GENRE2" -a "GENRE=$GENRE3" -a "TRACKNUMBER=$TRACK" -a "TOTALTRACKS=$TOTAL"
+    fi
+  done
+else
+  for SONG in *.opus; do
+    NAME="$(printf "$SONG" | awk '{print substr($0, index($0, $3))}' | sed 's/\.opus$//g')"
+    TRACK="$(printf "$(expr $TRACK + 1)")"
+    printf "Writing metadata of '$SONG'\n"
+    opustags "$SONG" --in-place -D
+
+    # If the album has more than one disc
+    if [ -n "$DISCNUMBER" ]; then
+      opustags "$SONG" --in-place -a "TITLE=$NAME" -a "ALBUM=$ALBUM" -a "ARTIST=$ARTIST" -a "DATE=$DATE" -a "GENRE=$GENRE" -a "TRACKNUMBER=$TRACK" -a "TOTALTRACKS=$TOTAL" -a "DISCNUMBER=$DISCNUMBER"
+    else
+      opustags "$SONG" --in-place -a "TITLE=$NAME" -a "ALBUM=$ALBUM" -a "ARTIST=$ARTIST" -a "DATE=$DATE" -a "GENRE=$GENRE" -a "TRACKNUMBER=$TRACK" -a "TOTALTRACKS=$TOTAL"
+    fi
+  done
+fi
+
+# Dialog to remove unnecessary files
+EXIT=false
+while [ $EXIT = false ]; do
+  echo
+  printf "¿Do you want to remove unnecessary files? [y/n]\n" && read ANSWER
+  case "$ANSWER" in
+    y)
+      rm tracks
+      # Comment the line from above and un-comment the line below if using youtube-dl
+      # rm *.m4a tracks
+      echo
+      printf "${GREEN}${BOLD}¡Done!${NC}\n"
+      EXIT=true
+      ;;
+    n)
+      echo
+      printf "${GREEN}${BOLD}¡Done!${NC}\n"
+      EXIT=true
+      ;;
+    *)
+      echo
+      printf "${RED}${BOLD}That's not a valid option${NC}\n"
+      ;;
+  esac
+done
